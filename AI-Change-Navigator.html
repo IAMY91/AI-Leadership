@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Change Navigator</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #22263a;
+      --border:    #2e3352;
+      --accent:    #6366f1;
+      --accent2:   #818cf8;
+      --accent3:   #a5b4fc;
+      --green:     #22c55e;
+      --amber:     #f59e0b;
+      --rose:      #f43f5e;
+      --cyan:      #06b6d4;
+      --text:      #e2e8f0;
+      --muted:     #94a3b8;
+      --radius:    12px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,17,23,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; gap: 2rem;
+      height: 60px;
+    }
+
+    .nav-logo {
+      font-weight: 700; font-size: 1rem;
+      color: var(--accent2);
+      white-space: nowrap;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .nav-logo span { font-size: 1.2rem; }
+
+    .nav-links {
+      display: flex; gap: 0.25rem;
+      overflow-x: auto; flex: 1;
+    }
+
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.8rem; padding: 0.4rem 0.75rem;
+      border-radius: 20px; white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); background: var(--surface2); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.15), transparent);
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3);
+      color: var(--accent3); padding: 0.35rem 1rem;
+      border-radius: 20px; font-size: 0.8rem; font-weight: 500;
+      margin-bottom: 1.5rem; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1.15;
+      background: linear-gradient(135deg, #e2e8f0 0%, var(--accent2) 60%, var(--cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero p {
+      font-size: 1.1rem; color: var(--muted);
+      max-width: 680px; margin: 0 auto 2.5rem;
+    }
+
+    .hero-axiom {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem; color: var(--accent3);
+      max-width: 600px; text-align: left;
+    }
+
+    .hero-axiom strong { color: var(--text); }
+
+    /* ── Section ── */
+    section { padding: 4rem 2rem; max-width: 1100px; margin: 0 auto; }
+    section + section { padding-top: 0; }
+
+    .section-header {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .section-title { font-size: 1.5rem; font-weight: 700; }
+    .section-subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 0.1rem; }
+
+    h2.standalone {
+      font-size: 1.75rem; font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .lead { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── Maturity ── */
+    .maturity-steps {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .maturity-step {
+      flex: 1 1 160px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .maturity-step:hover, .maturity-step.active {
+      border-color: var(--accent);
+      background: rgba(99,102,241,0.08);
+    }
+
+    .maturity-step .step-num {
+      font-size: 1.5rem; font-weight: 800;
+      color: var(--accent2); line-height: 1;
+    }
+
+    .maturity-step .step-label {
+      font-size: 0.8rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); margin-top: 0.25rem;
+    }
+
+    .maturity-step .step-desc {
+      font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;
+    }
+
+    .maturity-dims {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem;
+    }
+
+    .dim-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+    }
+
+    .dim-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag-tech { background: rgba(6,182,212,0.15); color: var(--cyan); }
+    .tag-culture { background: rgba(245,158,11,0.15); color: var(--amber); }
+    .tag-lead { background: rgba(99,102,241,0.15); color: var(--accent2); }
+
+    .dim-card h4 { font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .dim-card p { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── Shift table ── */
+    .shift-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .shift-table th {
+      text-align: left; padding: 0.75rem 1rem;
+      background: var(--surface2);
+      color: var(--muted); font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .shift-table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); }
+
+    .shift-table tr:last-child td { border-bottom: none; }
+
+    .shift-from { color: var(--muted); }
+    .shift-arrow { color: var(--accent); font-size: 1rem; text-align: center; }
+    .shift-to { color: var(--green); font-weight: 600; }
+    .shift-desc { color: var(--muted); font-size: 0.8rem; }
+
+    /* ── Learning formats ── */
+    .learn-tabs {
+      display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); padding: 0.5rem 1rem;
+      border-radius: 20px; font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent); border-color: var(--accent);
+      color: #fff;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .micro-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .micro-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+
+    .micro-time {
+      background: rgba(99,102,241,0.15); color: var(--accent2);
+      padding: 0.2rem 0.5rem; border-radius: 4px;
+      font-size: 0.7rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+    }
+
+    .micro-item p { font-size: 0.85rem; }
+
+    .workshop-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex; gap: 1rem; align-items: center;
+    }
+
+    .ws-icon { font-size: 1.5rem; }
+    .ws-title { font-weight: 600; font-size: 0.9rem; }
+    .ws-desc { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+
+    .exp-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: var(--radius-sm); padding: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .exp-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .exp-duration {
+      background: rgba(34,197,94,0.1); color: var(--green);
+      padding: 0.2rem 0.6rem; border-radius: 4px;
+      font-size: 0.7rem; font-weight: 600;
+    }
+
+    .exp-card p { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── Scenarios ── */
+    .scenario-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+    }
+
+    .scenario-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      cursor: pointer; transition: all 0.25s;
+      position: relative; overflow: hidden;
+    }
+
+    .scenario-card::before {
+      content: ''; position: absolute; inset: 0;
+      opacity: 0; transition: opacity 0.25s;
+    }
+
+    .scenario-card:hover { transform: translateY(-2px); }
+
+    .sc-a::before { background: radial-gradient(circle at top right, rgba(6,182,212,0.08), transparent 60%); }
+    .sc-b::before { background: radial-gradient(circle at top right, rgba(245,158,11,0.08), transparent 60%); }
+    .sc-c::before { background: radial-gradient(circle at top right, rgba(99,102,241,0.08), transparent 60%); }
+    .sc-d::before { background: radial-gradient(circle at top right, rgba(244,63,94,0.08), transparent 60%); }
+
+    .scenario-card:hover::before { opacity: 1; }
+
+    .scenario-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.5rem;
+    }
+
+    .sc-a .scenario-label { color: var(--cyan); }
+    .sc-b .scenario-label { color: var(--amber); }
+    .sc-c .scenario-label { color: var(--accent2); }
+    .sc-d .scenario-label { color: var(--rose); }
+
+    .scenario-card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .scenario-card p { font-size: 0.825rem; color: var(--muted); margin-bottom: 0.75rem; }
+
+    .scenario-outputs {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+
+    .output-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); padding: 0.2rem 0.6rem;
+      border-radius: 20px; font-size: 0.7rem;
+    }
+
+    /* ── Dashboard ── */
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem;
+    }
+
+    .metric-title {
+      font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); margin-bottom: 0.75rem;
+    }
+
+    .metric-value {
+      font-size: 2.25rem; font-weight: 800; line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-bar {
+      height: 4px; background: var(--surface2);
+      border-radius: 2px; overflow: hidden; margin-bottom: 0.5rem;
+    }
+
+    .metric-fill { height: 100%; border-radius: 2px; }
+
+    .metric-label { font-size: 0.75rem; color: var(--muted); }
+
+    .pulse-items { list-style: none; }
+
+    .pulse-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+    }
+
+    .pulse-item:last-child { border-bottom: none; }
+
+    .pulse-score {
+      min-width: 2.5rem; text-align: right;
+      font-weight: 700; font-size: 0.9rem;
+    }
+
+    .pulse-bar-wrap {
+      flex: 1; height: 6px; background: var(--surface2);
+      border-radius: 3px; overflow: hidden;
+    }
+
+    .pulse-fill { height: 100%; border-radius: 3px; background: var(--green); }
+
+    .pulse-label { font-size: 0.8rem; color: var(--muted); flex: 2; }
+
+    /* ── Emotional Strip ── */
+    .emotion-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius);
+      padding: 2rem;
+    }
+
+    .emotion-tools {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .emotion-tool {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.25rem;
+    }
+
+    .emotion-icon { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .emotion-tool h4 { font-size: 0.9rem; margin-bottom: 0.4rem; }
+    .emotion-tool p { font-size: 0.8rem; color: var(--muted); }
+
+    .coaching-q {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem; margin-top: 0.75rem;
+      font-size: 0.8rem; color: var(--accent3);
+      font-style: italic;
+    }
+
+    /* ── Principles ── */
+    .principles-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .principle {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.25rem;
+    }
+
+    .principle-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .principle h4 { font-size: 0.875rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .principle p { font-size: 0.775rem; color: var(--muted); }
+
+    /* ── Positioning ── */
+    .positioning {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .pos-row {
+      display: flex; align-items: center;
+      justify-content: center; gap: 1rem;
+      flex-wrap: wrap; margin-top: 1.5rem;
+    }
+
+    .pos-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .pos-box.center-box {
+      background: rgba(99,102,241,0.12);
+      border-color: var(--accent);
+      color: var(--accent2); font-weight: 700;
+    }
+
+    .pos-arrow { color: var(--muted); font-size: 1.5rem; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted); font-size: 0.8rem;
+    }
+
+    footer strong { color: var(--accent2); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .maturity-dims { grid-template-columns: 1fr; }
+      .scenario-grid { grid-template-columns: 1fr; }
+      .emotion-tools { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      section { padding: 2.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo"><span>◈</span> AI Change Navigator</div>
+  <div class="nav-links">
+    <a href="#assessment">Maturity</a>
+    <a href="#compass">Compass</a>
+    <a href="#lernpfad">Lernpfad</a>
+    <a href="#scenarios">Szenarien</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#emotion">Kulturarbeit</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">◈ Führungskräfte · KI · Transformation</div>
+  <h1>AI Change Navigator</h1>
+  <p>Ein ganzheitliches Befähigungstool für Führungskräfte und Teams, die KI wirklich integrieren wollen — in Kultur, Entscheidungslogik und Selbstverständnis.</p>
+  <div class="hero-axiom">
+    <strong>Zentrales Axiom:</strong> KI-Transformation ist primär eine <strong>Führungsaufgabe</strong>, keine IT-Aufgabe. Erfolg entsteht nicht durch Tool-Rollouts, sondern durch ein neues Führungsverständnis.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODULE 1: Maturity Assessment -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="assessment">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div>
+      <div class="section-title">AI Maturity Assessment</div>
+      <div class="section-subtitle">„Wo stehen wir wirklich?"</div>
+    </div>
+  </div>
+
+  <p class="lead">Kein generisches Quiz — ein kontextsensitives Diagnosetool auf drei Ebenen.</p>
+
+  <div class="maturity-dims" style="margin-bottom: 2rem;">
+    <div class="dim-card">
+      <div class="dim-tag tag-tech">A — Technologie</div>
+      <h4>Technologische Reife</h4>
+      <p>Welche KI-Tools werden genutzt? Wie systematisch? Wie tief in Workflows verankert?</p>
+    </div>
+    <div class="dim-card">
+      <div class="dim-tag tag-culture">B — Kultur</div>
+      <h4>Kulturelle Reife</h4>
+      <p>Grundhaltung im Team: Neugier, Skepsis, Angst, Pragmatismus? Wie werden Fehler im Experimentieren bewertet?</p>
+    </div>
+    <div class="dim-card">
+      <div class="dim-tag tag-lead">C — Führung</div>
+      <h4>Führungsreife</h4>
+      <p>Hat die Führungskraft ein klares KI-Narrativ? Kommuniziert sie Sinn? Gibt sie Raum für Reibung und Fragen?</p>
+    </div>
+  </div>
+
+  <p style="font-size:0.85rem; color: var(--muted); margin-bottom: 1rem;">Reifegrad-Skala — klicken zum Erkunden:</p>
+
+  <div class="maturity-steps">
+    <div class="maturity-step active" onclick="setActive(this)">
+      <div class="step-num">1</div>
+      <div class="step-label">Exploring</div>
+      <div class="step-desc">Erste Berührungspunkte, punktueller Einsatz einzelner Tools.</div>
+    </div>
+    <div class="maturity-step" onclick="setActive(this)">
+      <div class="step-num">2</div>
+      <div class="step-label">Experimenting</div>
+      <div class="step-desc">Aktives Ausprobieren, erste Muster erkennbar, Lernkurve sichtbar.</div>
+    </div>
+    <div class="maturity-step" onclick="setActive(this)">
+      <div class="step-num">3</div>
+      <div class="step-label">Embedding</div>
+      <div class="step-desc">KI wird in Kernprozesse integriert, Routinen entstehen.</div>
+    </div>
+    <div class="maturity-step" onclick="setActive(this)">
+      <div class="step-num">4</div>
+      <div class="step-label">Scaling</div>
+      <div class="step-desc">Systematische Ausweitung, Wissenstransfer im Team.</div>
+    </div>
+    <div class="maturity-step" onclick="setActive(this)">
+      <div class="step-num">5</div>
+      <div class="step-label">Transforming</div>
+      <div class="step-desc">KI verändert Geschäftsmodell und organisationale Identität.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODULE 2: Leadership Compass -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="compass">
+  <div class="section-header">
+    <div class="section-num" style="background: var(--cyan);">2</div>
+    <div>
+      <div class="section-title">Leadership Compass</div>
+      <div class="section-subtitle">„Welches Führungsverständnis braucht es?"</div>
+    </div>
+  </div>
+
+  <p class="lead">Das Herzstück des Navigators. KI-Transformation erfordert ein fundamental anderes Führungsbild.</p>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <table class="shift-table">
+      <thead>
+        <tr>
+          <th>Vom…</th>
+          <th></th>
+          <th>…zum…</th>
+          <th>Implikation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="shift-from">Wissensmonopolisten</td>
+          <td class="shift-arrow">→</td>
+          <td class="shift-to">Lernarchitekten</td>
+          <td class="shift-desc">Lernräume schaffen, in denen Teams sicher experimentieren können</td>
+        </tr>
+        <tr>
+          <td class="shift-from">Kontrolleur</td>
+          <td class="shift-arrow">→</td>
+          <td class="shift-to">Sinnstifter</td>
+          <td class="shift-desc">Warum tun wir das? Was bleibt genuin menschlich?</td>
+        </tr>
+        <tr>
+          <td class="shift-from">Linearer Planer</td>
+          <td class="shift-arrow">→</td>
+          <td class="shift-to">Adaptiver Navigator</td>
+          <td class="shift-desc">Prinzipien statt Roadmaps — KI-Landschaften verändern sich zu schnell</td>
+        </tr>
+        <tr>
+          <td class="shift-from">Einzelentscheider</td>
+          <td class="shift-arrow">→</td>
+          <td class="shift-to">Kollektive Intelligenz</td>
+          <td class="shift-desc">KI-gestützte Entscheidungsprozesse moderieren, nicht dominieren</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div style="font-size:1.25rem; margin-bottom:0.5rem;">🪞</div>
+      <h4 style="margin-bottom:0.4rem; font-size:0.9rem;">Selbstreflexionsübungen</h4>
+      <p style="font-size:0.8rem; color:var(--muted);">„Was verliere ich, wenn KI Entscheidungen übernimmt?" — geführte Reflexion zu eigenen Führungsannahmen.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:1.25rem; margin-bottom:0.5rem;">▶️</div>
+      <h4 style="margin-bottom:0.4rem; font-size:0.9rem;">Kurzvideos & Leseimpulse</h4>
+      <p style="font-size:0.8rem; color:var(--muted);">Aus AI Leadership, Soziokratie und Complexity Leadership Theory — kurz und anwendbar.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:1.25rem; margin-bottom:0.5rem;">⚡</div>
+      <h4 style="margin-bottom:0.4rem; font-size:0.9rem;">Verhaltensanker</h4>
+      <p style="font-size:0.8rem; color:var(--muted);">„Was tue ich morgen früh anders?" — konkrete Mikrohandlungen für den nächsten Arbeitstag.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:1.25rem; margin-bottom:0.5rem;">💬</div>
+      <h4 style="margin-bottom:0.4rem; font-size:0.9rem;">Peer-Coaching-Prompts</h4>
+      <p style="font-size:0.8rem; color:var(--muted);">Fragen für kollegialen Austausch — strukturiertes gegenseitiges Lernen unter Führungskräften.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODULE 3: Personalisierter Lernpfad -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="lernpfad">
+  <div class="section-header">
+    <div class="section-num" style="background: var(--green);">3</div>
+    <div>
+      <div class="section-title">Personalisierter Lernpfad</div>
+      <div class="section-subtitle">„Was brauche ich als nächstes?"</div>
+    </div>
+  </div>
+
+  <p class="lead">Basierend auf dem Maturity Assessment — drei Lernformate, individuell zusammengestellt.</p>
+
+  <div class="learn-tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'micro')">⚡ Microlearnings</button>
+    <button class="tab-btn" onclick="switchTab(this,'workshop')">🗺️ Workshop-Blueprints</button>
+    <button class="tab-btn" onclick="switchTab(this,'experiment')">🔬 Praxis-Experimente</button>
+  </div>
+
+  <div id="tab-micro" class="tab-panel active">
+    <div class="micro-list">
+      <div class="micro-item"><span class="micro-time">5 min</span><p>Prompting als Führungskompetenz</p></div>
+      <div class="micro-item"><span class="micro-time">10 min</span><p>KI-Bias verstehen und adressieren</p></div>
+      <div class="micro-item"><span class="micro-time">10 min</span><p>Entscheidungsverantwortung im KI-Zeitalter</p></div>
+      <div class="micro-item"><span class="micro-time">8 min</span><p>Psychologische Sicherheit beim Experimentieren</p></div>
+      <div class="micro-item"><span class="micro-time">12 min</span><p>Erklärbarkeit von KI-Entscheidungen im Team</p></div>
+      <div class="micro-item"><span class="micro-time">15 min</span><p>KI-Ethik: Grenzen setzen und kommunizieren</p></div>
+    </div>
+  </div>
+
+  <div id="tab-workshop" class="tab-panel">
+    <div class="workshop-item">
+      <div class="ws-icon">🌅</div>
+      <div>
+        <div class="ws-title">Halbtags-Workshop: KI-Kultur im Team</div>
+        <div class="ws-desc">Facilitation-Guide inkl. Liberating Structures, Reflexionsformate. Für Führungskräfte, die selbst moderieren.</div>
+      </div>
+    </div>
+    <div class="workshop-item">
+      <div class="ws-icon">🗓️</div>
+      <div>
+        <div class="ws-title">Ganztags-Workshop: Transformation gestalten</div>
+        <div class="ws-desc">Scenario Work, Sinnarchitektur, Rollenbilder der Zukunft. Inkl. Emotionskarte und Handlungsplanung.</div>
+      </div>
+    </div>
+    <div class="workshop-item">
+      <div class="ws-icon">🔄</div>
+      <div>
+        <div class="ws-title">Retrospektiven-Format: KI-Integration reviewen</div>
+        <div class="ws-desc">Regelmäßiges Teamformat für kontinuierliche Reflexion. 90 Minuten, vollständig facilitierbar ohne externe Begleitung.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-experiment" class="tab-panel">
+    <div class="exp-card">
+      <div class="exp-header">
+        <span class="exp-duration">2 Wochen</span>
+        <strong style="font-size:0.9rem;">KI in der Retrospektive</strong>
+      </div>
+      <p>Nutze KI als Protokollant und Mustererkennerin — reflektiert danach gemeinsam, was sich verändert hat.</p>
+    </div>
+    <div class="exp-card">
+      <div class="exp-header">
+        <span class="exp-duration">4 Wochen</span>
+        <strong style="font-size:0.9rem;">Wöchentliches KI-Experiment-Log</strong>
+      </div>
+      <p>Jede:r im Team dokumentiert ein KI-Experiment pro Woche — Ergebnisse, Überraschungen, Fragen. Führungskraft clustert und spiegelt Muster zurück.</p>
+    </div>
+    <div class="exp-card">
+      <div class="exp-header">
+        <span class="exp-duration">3 Wochen</span>
+        <strong style="font-size:0.9rem;">Entscheidungs-Audit</strong>
+      </div>
+      <p>Welche Entscheidungen treffen wir heute anders mit KI? Welche bewusst ohne? Audit mit anschließender Teamdebatte.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODULE 4: Scenario Planner -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="scenarios">
+  <div class="section-header">
+    <div class="section-num" style="background: var(--amber);">4</div>
+    <div>
+      <div class="section-title">Scenario Planner</div>
+      <div class="section-subtitle">„Wie sieht unsere Zukunft aus?"</div>
+    </div>
+  </div>
+
+  <p class="lead">Interaktives Simulationsmodul — vier Zukunftsszenarien für Teams zum Durchspielen.</p>
+
+  <div class="scenario-grid">
+    <div class="scenario-card sc-a">
+      <div class="scenario-label">Szenario A</div>
+      <h3>Minimale Integration</h3>
+      <p>KI als Assistenztool, Rollen bleiben stabil. Kontinuität statt Disruption.</p>
+      <p style="font-size:0.775rem; color: var(--rose);">⚠ Produktivitätsgefälle zur Konkurrenz, Frust bei Vorreitern</p>
+      <div class="scenario-outputs">
+        <span class="output-chip">Rollenkarten</span>
+        <span class="output-chip">Entscheidungslandkarte</span>
+        <span class="output-chip">Emotionskarte</span>
+      </div>
+    </div>
+    <div class="scenario-card sc-b">
+      <div class="scenario-label">Szenario B</div>
+      <h3>Selektive Augmentation</h3>
+      <p>Bestimmte Rollen werden durch KI stark verändert, andere kaum. Gezielte Transformation.</p>
+      <p style="font-size:0.775rem; color: var(--amber);">↕ Karrierewege, Fairness, Kompetenzentwicklung neu denken</p>
+      <div class="scenario-outputs">
+        <span class="output-chip">Rollenkarten</span>
+        <span class="output-chip">Karrierepfade</span>
+        <span class="output-chip">Handlungsempfehlungen</span>
+      </div>
+    </div>
+    <div class="scenario-card sc-c">
+      <div class="scenario-label">Szenario C</div>
+      <h3>Tiefe Transformation</h3>
+      <p>Kernprozesse werden neu gedacht. Neue Rollen entstehen: AI Workflow Designer, Human-AI Collaboration Lead.</p>
+      <p style="font-size:0.775rem; color: var(--accent2);">→ Alte Rollen entfallen oder verschmelzen</p>
+      <div class="scenario-outputs">
+        <span class="output-chip">Neue Rollenbilder</span>
+        <span class="output-chip">Prozesslandkarte</span>
+        <span class="output-chip">Emotionskarte</span>
+      </div>
+    </div>
+    <div class="scenario-card sc-d">
+      <div class="scenario-label">Szenario D</div>
+      <h3>Organisationale Neugründung</h3>
+      <p>KI verändert das Geschäftsmodell fundamental. Wer sind wir dann noch?</p>
+      <p style="font-size:0.775rem; color: var(--rose);">❓ Was ist unser genuiner menschlicher Wertbeitrag?</p>
+      <div class="scenario-outputs">
+        <span class="output-chip">Identitätsarbeit</span>
+        <span class="output-chip">Wertbeitrag-Canvas</span>
+        <span class="output-chip">Strategische Optionen</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MODULE 5: Impact Dashboard -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="dashboard">
+  <div class="section-header">
+    <div class="section-num" style="background: var(--rose);">5</div>
+    <div>
+      <div class="section-title">Impact Dashboard</div>
+      <div class="section-subtitle">„Was verändert sich messbar?"</div>
+    </div>
+  </div>
+
+  <p class="lead">Bedeutungsvolle Indikatoren — keine Vanity Metrics. Transformation wird sichtbar.</p>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-title">Adoptions-Metriken</div>
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+          <span style="font-size:0.8rem;">Workflows mit KI</span>
+          <span style="font-size:0.8rem; color:var(--green);">67%</span>
+        </div>
+        <div class="metric-bar"><div class="metric-fill" style="width:67%; background:var(--green);"></div></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem; margin-top:0.75rem;">
+          <span style="font-size:0.8rem;">Experimentierrate</span>
+          <span style="font-size:0.8rem; color:var(--cyan);">42%</span>
+        </div>
+        <div class="metric-bar"><div class="metric-fill" style="width:42%; background:var(--cyan);"></div></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem; margin-top:0.75rem;">
+          <span style="font-size:0.8rem;">Nutzungstiefe</span>
+          <span style="font-size:0.8rem; color:var(--accent2);">54%</span>
+        </div>
+        <div class="metric-bar"><div class="metric-fill" style="width:54%; background:var(--accent2);"></div></div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">Pulse Survey — Team-Dynamik</div>
+      <ul class="pulse-items">
+        <li class="pulse-item">
+          <span class="pulse-score" style="color:var(--green);">7.8</span>
+          <div class="pulse-bar-wrap"><div class="pulse-fill" style="width:78%;"></div></div>
+          <span class="pulse-label">Psych. Sicherheit</span>
+        </li>
+        <li class="pulse-item">
+          <span class="pulse-score" style="color:var(--amber);">6.2</span>
+          <div class="pulse-bar-wrap"><div class="pulse-fill" style="width:62%; background:var(--amber);"></div></div>
+          <span class="pulse-label">Vertrauen in KI-Entsch.</span>
+        </li>
+        <li class="pulse-item">
+          <span class="pulse-score" style="color:var(--accent2);">8.1</span>
+          <div class="pulse-bar-wrap"><div class="pulse-fill" style="width:81%; background:var(--accent2);"></div></div>
+          <span class="pulse-label">Wahrgen. Sinnhaftigkeit</span>
+        </li>
+        <li class="pulse-item">
+          <span class="pulse-score" style="color:var(--cyan);">7.4</span>
+          <div class="pulse-bar-wrap"><div class="pulse-fill" style="width:74%; background:var(--cyan);"></div></div>
+          <span class="pulse-label">Führungsverhalten</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">Entwicklungsfortschritt</div>
+      <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+        <div style="text-align:center;">
+          <div class="metric-value" style="color:var(--accent2);">12</div>
+          <div class="metric-label">Module</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="metric-value" style="color:var(--green);">3</div>
+          <div class="metric-label">Workshops</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="metric-value" style="color:var(--amber);">5</div>
+          <div class="metric-label">Experimente</div>
+        </div>
+      </div>
+      <div style="font-size:0.75rem; color:var(--muted); margin-bottom:0.5rem;">Reifegradentwicklung</div>
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <span style="font-size:0.75rem; color:var(--muted);">Exploring</span>
+        <div style="flex:1; height:8px; background:var(--surface2); border-radius:4px; overflow:hidden;">
+          <div style="width:55%; height:100%; background:linear-gradient(90deg, var(--accent), var(--cyan)); border-radius:4px;"></div>
+        </div>
+        <span style="font-size:0.75rem; color:var(--cyan);">Embedding</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--muted);">
+    <p style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem;">Qualitative Reflexionsspuren — geclusterte Muster aus Team-Retrospektiven</p>
+    <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+      <span style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.2); color:var(--accent2); padding:0.3rem 0.75rem; border-radius:20px; font-size:0.75rem;">Zeitgewinn durch Automatisierung ×8</span>
+      <span style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.2); color:var(--amber); padding:0.3rem 0.75rem; border-radius:20px; font-size:0.75s;">Unsicherheit bei Qualitätskontrolle ×5</span>
+      <span style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); color:var(--green); padding:0.3rem 0.75rem; border-radius:20px; font-size:0.75rem;">Neue Ideen durch KI-Brainstorming ×6</span>
+      <span style="background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.2); color:var(--cyan); padding:0.3rem 0.75rem; border-radius:20px; font-size:0.75rem;">Frage nach Entscheidungsverantwortung ×4</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Emotional & Cultural Accompaniment -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="emotion">
+  <div class="emotion-strip">
+    <h2 class="standalone">Emotionale & kulturelle Begleitung</h2>
+    <p class="lead" style="margin-bottom:0;">Durch alle Module hindurch — Wandel ist immer auch emotionale Arbeit.</p>
+
+    <div class="emotion-tools">
+      <div class="emotion-tool">
+        <div class="emotion-icon">🌡️</div>
+        <h4>Widerstandsradar</h4>
+        <p>Regelmäßige Kurzabfragen — emotionale Temperaturen im Team frühzeitig erkennen, nicht kontrollieren.</p>
+        <div class="coaching-q">„Wie sicher fühlst du dich beim Ausprobieren neuer KI-Tools?" (Skala 1–10)</div>
+      </div>
+      <div class="emotion-tool">
+        <div class="emotion-icon">💡</div>
+        <h4>Coaching-Impulse</h4>
+        <p>Reflexionsfragen für 1:1s und Teamgespräche — als Türöffner für ehrliche Dialoge.</p>
+        <div class="coaching-q">„Was beunruhigt dich am meisten an KI in unserem Team?"</div>
+        <div class="coaching-q" style="margin-top:0.5rem;">„Wann hast du zuletzt etwas mit KI ausprobiert, das nicht funktioniert hat?"</div>
+      </div>
+      <div class="emotion-tool">
+        <div class="emotion-icon">🏛️</div>
+        <h4>Sinnarchitektur</h4>
+        <p>Führungskräfte entwickeln ein kohärentes Narrativ für ihre KI-Transformation.</p>
+        <div class="coaching-q">„Was wollen wir mit KI schützen — Zeit, Energie, Kreativität?"</div>
+        <div class="coaching-q" style="margin-top:0.5rem;">„Was wollen wir freimachen?"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Principles -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="principles">
+  <h2 class="standalone">Technische & konzeptuelle Prinzipien</h2>
+  <p class="lead">Design-Entscheidungen, die den Navigator tragen.</p>
+
+  <div class="principles-grid">
+    <div class="principle">
+      <div class="principle-icon">🧩</div>
+      <h4>Modular</h4>
+      <p>Jedes Modul eigenständig nutzbar — für Einsteiger wie Fortgeschrittene.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">👥</div>
+      <h4>Team & Einzeln</h4>
+      <p>Individuelles Arbeiten UND kollektive Team-Sessions gleichwertig vorgesehen.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">🌊</div>
+      <h4>Progressiv</h4>
+      <p>Niedrigschwelliger Einstieg; Tiefe für alle, die sie suchen.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">🎤</div>
+      <h4>Facilitation-ready</h4>
+      <p>Führungskräfte moderieren selbst — externe Begleitung optional, nicht notwendig.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">⚖️</div>
+      <h4>Ethik-Anker</h4>
+      <p>Expliziter Reflexionsstrang zu KI-Ethik, Datenhoheit, algorithmischer Transparenz.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem; border-left: 3px solid var(--rose); text-align:center; padding: 1.5rem 2rem;">
+    <p style="color:var(--muted); font-size:0.85rem; margin-bottom:0.5rem;">Ethik-Kernfrage</p>
+    <p style="font-size:1.1rem; color:var(--text); font-style:italic;">„Welche Entscheidungen darf KI bei uns <strong style="color:var(--rose);">niemals</strong> treffen?"</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Positioning -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="positioning" style="padding-bottom: 5rem;">
+  <h2 class="standalone">Marktpositionierung</h2>
+  <p class="lead">Der AI Change Navigator besetzt eine klare Lücke im Markt.</p>
+
+  <div class="positioning">
+    <div class="pos-row">
+      <div class="pos-box">
+        <strong>KI-Skill-Trainings</strong><br>
+        <span style="font-size:0.75rem; color:var(--muted);">Zu technisch, zu oberflächlich</span>
+      </div>
+      <div class="pos-arrow">←</div>
+      <div class="pos-box center-box">
+        ◈ AI Change Navigator<br>
+        <span style="font-size:0.75rem; color:var(--accent3);">Führungskraft als Transformationsarchitektin</span>
+      </div>
+      <div class="pos-arrow">→</div>
+      <div class="pos-box">
+        <strong>Klassisches Change Management</strong><br>
+        <span style="font-size:0.75rem; color:var(--muted);">Zu langsam, zu wenig KI-spezifisch</span>
+      </div>
+    </div>
+    <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--muted);">Das Bindeglied — der entscheidende Hebel: <strong style="color:var(--text);">die Führungskraft als Transformationsarchitektin, nicht Zuschauerin.</strong></p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <strong>AI Change Navigator</strong> — Konzeptprototyp<br>
+  <span style="margin-top:0.35rem; display:block;">KI-Transformation ist primär eine Führungsaufgabe.</span>
+</footer>
+
+<script>
+  function setActive(el) {
+    document.querySelectorAll('.maturity-step').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function switchTab(btn, panelId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + panelId).classList.add('active');
+  }
+</script>
+</body>
+</html>
